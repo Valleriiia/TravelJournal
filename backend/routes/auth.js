@@ -1,0 +1,76 @@
+import express from 'express';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+import User from '../models/User.js';
+
+const router = express.Router();
+
+// POST /api/auth/register
+router.post('/register', async (req, res) => {
+  try {
+    const { name, email, password } = req.body
+
+    const existing = await User.findOne({ email })
+    if (existing) return res.status(400).json({ message: 'Email вже використовується' })
+
+    const passwordHash = await bcrypt.hash(password, 10)
+    const user = await User.create({ name, email, passwordHash })
+
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' })
+    res.status(201).json({
+      token,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        avatar: user.avatar || null,
+        isPublicProfile: user.isPublicProfile,
+      }
+    })
+  } catch (err) {
+    res.status(500).json({ message: err.message })
+  }
+})
+
+// POST /api/auth/login
+router.post('/login', async (req, res) => {
+  try {
+    const { email, password } = req.body
+
+    const user = await User.findOne({ email })
+    if (!user) return res.status(400).json({ message: 'Невірний email або пароль' })
+
+    const isMatch = await bcrypt.compare(password, user.passwordHash)
+    if (!isMatch) return res.status(400).json({ message: 'Невірний email або пароль' })
+
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' })
+    res.json({
+      token,
+      user: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        avatar: user.avatar || null,
+        isPublicProfile: user.isPublicProfile,
+      }
+    })
+  } catch (err) {
+    res.status(500).json({ message: err.message })
+  }
+})
+
+// GET /api/auth/me
+router.get('/me', async (req, res) => {
+  try {
+    const token = req.header('Authorization')?.replace('Bearer ', '');
+    if (!token) return res.status(401).json({ message: 'Немає токена' });
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findById(decoded.id).select('-passwordHash');
+    res.json(user);
+  } catch {
+    res.status(401).json({ message: 'Токен недійсний' });
+  }
+});
+
+export default router;
