@@ -55,3 +55,33 @@ input, textarea, select {
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
+
+.leaflet-container {
+  z-index: 1;
+}
+
+.leaflet-control-geocoder {
+  .leaflet-control-geocoder-alternatives {
+    max-height: 220px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+
+    &::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: #f1f1f1;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: #ccc;
+      border-radius: 3px;
+    }
+  }
+
+  .leaflet-control-geocoder-form input:focus + .leaflet-control-geocoder-alternatives,
+  .leaflet-control-geocoder-alternatives:hover {
+    display: block !important;
+  }
+}
