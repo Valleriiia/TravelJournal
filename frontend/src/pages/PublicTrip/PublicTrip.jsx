@@ -79,6 +79,7 @@ const PublicTrip = () => {
           {trip.countries?.length > 0 && <span>🌍 {trip.countries.join(', ')}</span>}
           {trip.startDate && <span>📅 {new Date(trip.startDate).toLocaleDateString('uk-UA')}</span>}
           {trip.endDate && <span>🏁 {new Date(trip.endDate).toLocaleDateString('uk-UA')}</span>}
+          {trip.budget?.amount > 0 && <span>💰 {trip.budget.amount} {trip.budget.currency}</span>}
         </div>
       </div>
 
