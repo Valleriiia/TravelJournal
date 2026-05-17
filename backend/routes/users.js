@@ -133,20 +133,6 @@ router.get('/', async (req, res) => {
   }
 })
 
-// GET /api/users/:id — публічний профіль + поїздки
-router.get('/:id', async (req, res) => {
-  try {
-    const user = await User.findById(req.params.id).select('-passwordHash -email')
-    if (!user || !user.isPublicProfile) {
-      return res.status(404).json({ message: 'Профіль не знайдено або є приватним' })
-    }
-    const trips = await Trip.find({ userId: req.params.id, isPublic: true }).sort({ createdAt: -1 })
-    res.json({ user, trips })
-  } catch (err) {
-    res.status(500).json({ message: err.message })
-  }
-})
-
 // PUT /api/users/profile
 router.put('/profile', auth, async (req, res) => {
   try {
@@ -161,6 +147,20 @@ router.put('/profile', auth, async (req, res) => {
       { new: true }
     ).select('-passwordHash')
     res.json(user)
+  } catch (err) {
+    res.status(500).json({ message: err.message })
+  }
+})
+
+// GET /api/users/:id — публічний профіль + поїздки
+router.get('/:id', async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id).select('-passwordHash -email')
+    if (!user || !user.isPublicProfile) {
+      return res.status(404).json({ message: 'Профіль не знайдено або є приватним' })
+    }
+    const trips = await Trip.find({ userId: req.params.id, isPublic: true }).sort({ createdAt: -1 })
+    res.json({ user, trips })
   } catch (err) {
     res.status(500).json({ message: err.message })
   }

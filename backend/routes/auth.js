@@ -2,6 +2,7 @@ import express from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
+import authMiddleware from '../middleware/auth.js';
 
 const router = express.Router();
 
@@ -60,16 +61,13 @@ router.post('/login', async (req, res) => {
 })
 
 // GET /api/auth/me
-router.get('/me', async (req, res) => {
+router.get('/me', authMiddleware, async (req, res) => {
   try {
-    const token = req.header('Authorization')?.replace('Bearer ', '');
-    if (!token) return res.status(401).json({ message: 'Немає токена' });
-
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await User.findById(decoded.id).select('-passwordHash');
+    const user = await User.findById(req.user.id).select('-passwordHash');
+    if (!user) return res.status(404).json({ message: 'Користувача не знайдено' });
     res.json(user);
-  } catch {
-    res.status(401).json({ message: 'Токен недійсний' });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
   }
 });
 
