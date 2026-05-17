@@ -80,19 +80,28 @@
 }
 
 .explorer-card {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  padding: 1rem 1.25rem;
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
-  transition: box-shadow 0.2s, transform 0.2s;
+  overflow: hidden;
+  transition: box-shadow 0.2s;
 
   &:hover {
     box-shadow: var(--shadow-md);
-    transform: translateY(-2px);
+  }
+
+  // The top profile row (always a link)
+  &__profile {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    transition: background 0.15s;
+
+    &:hover {
+      background: var(--color-bg);
+    }
   }
 
   &__avatar {
@@ -119,5 +128,96 @@
     font-size: 0.8rem;
     color: var(--color-text-muted);
     margin-top: 0.15rem;
+  }
+
+  // Matches section below the profile row
+  &__matches {
+    border-top: 1px solid var(--color-border);
+    padding: 0.75rem 1.25rem;
+    background: var(--color-bg);
+  }
+
+  &__matches-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 0.5rem;
+  }
+
+  &__matches-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+
+  &__match {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    padding: 0.45rem 0.75rem;
+    font-size: 0.82rem;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.15s;
+    color: var(--color-text);
+
+    &:hover {
+      border-color: var(--color-primary);
+      background: #eff6ff;
+
+      .explorer-card__match-arrow {
+        transform: translateX(3px);
+        color: var(--color-primary);
+      }
+    }
+
+    &--trip {
+      &:hover { border-color: #2563eb; background: #eff6ff; }
+    }
+
+    &--place {
+      &:hover { border-color: #16a34a; background: #f0fdf4;
+        .explorer-card__match-hint { color: #16a34a; }
+      }
+    }
+
+    &--entry {
+      &:hover { border-color: #9333ea; background: #faf5ff;
+        .explorer-card__match-hint { color: #9333ea; }
+      }
+    }
+  }
+
+  &__match-icon {
+    font-size: 0.9rem;
+    flex-shrink: 0;
+  }
+
+  &__match-label {
+    font-weight: 500;
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__match-hint {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+
+  &__match-arrow {
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+    flex-shrink: 0;
+    transition: transform 0.15s, color 0.15s;
   }
 }

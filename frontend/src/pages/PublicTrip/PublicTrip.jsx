@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
 import { getPublicTrip } from '../../api/trips'
 import Lightbox from '../../components/Lightbox/Lightbox'
 import './PublicTrip.scss'
@@ -21,11 +21,14 @@ const STATUS_LABELS = {
 const PublicTrip = () => {
   const { id } = useParams()
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const [data, setData] = useState(null)
   const [error, setError] = useState('')
   const [tab, setTab] = useState('places')
   const [highlightedPlace, setHighlightedPlace] = useState(null)
+  const [highlightedEntry, setHighlightedEntry] = useState(null)
   const placeRefs = useRef({})
+  const entryRefs = useRef({})
   const [lightbox, setLightbox] = useState({ open: false, photos: [], index: 0 })
 
   const openLightbox = (photos, index) => setLightbox({ open: true, photos, index })
@@ -38,6 +41,30 @@ const PublicTrip = () => {
       .then(setData)
       .catch(err => setError(err.message || 'Поїздку не знайдено'))
   }, [id])
+
+  // After data loads, handle highlight from URL params
+  useEffect(() => {
+    if (!data) return
+    const highlightType = searchParams.get('highlight')
+    const highlightId = searchParams.get('id')
+    if (!highlightType || !highlightId) return
+
+    if (highlightType === 'place') {
+      setTab('places')
+      setHighlightedPlace(highlightId)
+      setTimeout(() => {
+        placeRefs.current[highlightId]?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        setTimeout(() => setHighlightedPlace(null), 2500)
+      }, 200)
+    } else if (highlightType === 'entry') {
+      setTab('journal')
+      setHighlightedEntry(highlightId)
+      setTimeout(() => {
+        entryRefs.current[highlightId]?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        setTimeout(() => setHighlightedEntry(null), 2500)
+      }, 200)
+    }
+  }, [data, searchParams])
 
   if (error) return (
     <div className="public-trip__error">
@@ -125,7 +152,11 @@ const PublicTrip = () => {
           {entries.length === 0
             ? <p className="public-trip__empty">Публічних записів немає</p>
             : entries.map(entry => (
-              <div key={entry._id} className="public-item">
+              <div
+                key={entry._id}
+                ref={el => entryRefs.current[entry._id] = el}
+                className={`public-item ${highlightedEntry === entry._id ? 'public-item--highlighted' : ''}`}
+              >
                 <div className="public-item__main">
                   <span className="public-item__title">{entry.title}</span>
                   {entry.placeId && (() => {
